@@ -8,13 +8,13 @@ def process_file(file_path, model_name, prompt_prefix):
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         # Create full prompt
         full_prompt = f"{prompt_prefix}\n\n{content}"
-        
+
         # Send to Ollama
         response = requests.post(
-            'http://localhost:11434/api/generate',
+            'http://192.168.0.18:11434/api/generate',
             json={
                 'model': model_name,
                 'prompt': full_prompt,
@@ -22,25 +22,25 @@ def process_file(file_path, model_name, prompt_prefix):
             },
             timeout=300
         )
-        
+
         if response.status_code != 200:
             raise Exception(f"Ollama API error: {response.status_code} - {response.text}")
-            
+
         result = response.json()['response']
-        
+
         # Create output path
         base = os.path.splitext(os.path.basename(file_path))[0]
         output_path = f"output/doc-{base}.md"
-        
+
         # Create output directory if needed
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        
+
         # Save result
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(result)
-            
+
         return output_path
-            
+
     except Exception as e:
         print(f"Error processing {file_path}: {str(e)}")
         return None
@@ -49,19 +49,30 @@ def main():
     parser = argparse.ArgumentParser(description='Process files with Ollama')
     parser.add_argument('--input', default='input', help='Input folder path')
     parser.add_argument('--model', default='llama3', help='Ollama model name')
-    parser.add_argument('--prompt', default='Summarize the following text:', 
+    parser.add_argument('--prompt', default='Summarize the following text:',
                       help='Prompt prefix to send to Ollama')
     args = parser.parse_args()
-
+    model = args.model
+    prompt = args.prompt
     # Process all files in input folder
     files = glob.glob(f"{args.input}/*")
-    
+
     if not files:
         print(f"No files found in {args.input}")
         return
 
+    if not model:
+        model = "Qwen3-32B-GGUF:Q4_K_M"
+
+    if not prompt:
+        prompt = "Create a technical document explaining the following code, including its purpose and how it works."
+        prompt += "Use bullet points to explain each step of the code. Make sure to use proper grammar and punctuation."
+        prompt += "Also, make sure that your document is easy to understand for someone who has no programming experience."
+        prompt += "Make Sure the output is in Markdown format."
+
+
     for file_path in files:
-        output_path = process_file(file_path, args.model, args.prompt)
+        output_path = process_file(file_path, model, args.prompt)
         if output_path:
             print(f"Created: {output_path}")
 

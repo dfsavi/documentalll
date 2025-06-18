@@ -58,6 +58,7 @@ def main():
     # Process all files in input folder and subfolders
     files = glob.glob(f"{args.input}/**/*", recursive=True)
     files = [f for f in files if os.path.isfile(f)]
+    print('files: ', files);
 
     if not files:
         print(f"No files found in {args.input}")

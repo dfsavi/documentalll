@@ -33,7 +33,7 @@ def process_file(file_path, model_name, prompt_prefix, input_dir):
         relative_dir = os.path.dirname(relative_path)
         filename_base = os.path.splitext(os.path.basename(file_path))[0]
         output_subdir = os.path.join("output", relative_dir)
-        output_path = os.path.join(output_subdir, f"doc-{filename_base}.md")
+        output_path = os.path.join(output_subdir, f"{filename_base}.md")
 
         # Create output directory if needed
         os.makedirs(output_subdir, exist_ok=True)

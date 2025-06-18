@@ -55,8 +55,9 @@ def main():
     model = args.model
     prompt = args.prompt
 
-    # Process all files in input folder
-    files = glob.glob(f"{args.input}/*")
+    # Process all files in input folder and subfolders
+    files = glob.glob(f"{args.input}/**/*", recursive=True)
+    files = [f for f in files if os.path.isfile(f)]
 
     if not files:
         print(f"No files found in {args.input}")
@@ -67,7 +68,6 @@ def main():
         prompt += "Use bullet points to explain each step of the code. Make sure to use proper grammar and punctuation."
         prompt += "Also, make sure that your document is easy to understand for someone who has no programming experience."
         prompt += "Make Sure the output is in Markdown format."
-
 
     for file_path in files:
         output_path = process_file(file_path, model, prompt)

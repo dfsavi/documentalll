@@ -20,7 +20,7 @@ def process_file(file_path, model_name, prompt_prefix):
                 'prompt': full_prompt,
                 'stream': False
             },
-            timeout=300
+            timeout=600
         )
 
         if response.status_code != 200:
@@ -48,12 +48,13 @@ def process_file(file_path, model_name, prompt_prefix):
 def main():
     parser = argparse.ArgumentParser(description='Process files with Ollama')
     parser.add_argument('--input', default='input', help='Input folder path')
-    parser.add_argument('--model', default='llama3', help='Ollama model name')
-    parser.add_argument('--prompt', default='Summarize the following text:',
+    parser.add_argument('--model', default='hf.co/unsloth/Qwen3-32B-GGUF:Q4_K_M', help='Ollama model name')
+    parser.add_argument('--prompt', default='',
                       help='Prompt prefix to send to Ollama')
     args = parser.parse_args()
     model = args.model
     prompt = args.prompt
+
     # Process all files in input folder
     files = glob.glob(f"{args.input}/*")
 
@@ -61,18 +62,15 @@ def main():
         print(f"No files found in {args.input}")
         return
 
-    if not model:
-        model = "Qwen3-32B-GGUF:Q4_K_M"
-
-    if not prompt:
-        prompt = "Create a technical document explaining the following code, including its purpose and how it works."
+    if prompt == "":
+        prompt = "/not_think Create a technical document explaining the following code, including its purpose and how it works."
         prompt += "Use bullet points to explain each step of the code. Make sure to use proper grammar and punctuation."
         prompt += "Also, make sure that your document is easy to understand for someone who has no programming experience."
         prompt += "Make Sure the output is in Markdown format."
 
 
     for file_path in files:
-        output_path = process_file(file_path, model, args.prompt)
+        output_path = process_file(file_path, model, prompt)
         if output_path:
             print(f"Created: {output_path}")
 

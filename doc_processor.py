@@ -3,7 +3,7 @@ import glob
 import argparse
 import requests
 
-def process_file(file_path, model_name, prompt_prefix):
+def process_file(file_path, model_name, prompt_prefix, input_dir):
     try:
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -28,12 +28,15 @@ def process_file(file_path, model_name, prompt_prefix):
 
         result = response.json()['response']
 
-        # Create output path
-        base = os.path.splitext(os.path.basename(file_path))[0]
-        output_path = f"output/doc-{base}.md"
+        # Create output path preserving the original folder structure
+        relative_path = os.path.relpath(file_path, input_dir)
+        relative_dir = os.path.dirname(relative_path)
+        filename_base = os.path.splitext(os.path.basename(file_path))[0]
+        output_subdir = os.path.join("output", relative_dir)
+        output_path = os.path.join(output_subdir, f"doc-{filename_base}.md")
 
         # Create output directory if needed
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        os.makedirs(output_subdir, exist_ok=True)
 
         # Save result
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -71,7 +74,7 @@ def main():
         prompt += "Make Sure the output is in Markdown format."
 
     for file_path in files:
-        output_path = process_file(file_path, model, prompt)
+        output_path = process_file(file_path, model, prompt, args.input)
         if output_path:
             print(f"Created: {output_path}")
 
